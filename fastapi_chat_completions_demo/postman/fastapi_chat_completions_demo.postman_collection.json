@@ -1,0 +1,100 @@
+{
+    "info": {
+        "name": "FastAPI Chat Completions Demo",
+        "description": "Collection for exercising the FastAPI Chat Completions API locally.",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+        "version": "1.0.0"
+    },
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://127.0.0.1:8000",
+            "type": "string"
+        }
+    ],
+    "item": [
+        {
+            "name": "Create Chat",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/chat",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "chat"
+                    ]
+                }
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test(\"Status code is 201\", function () {",
+                            "    pm.response.to.have.status(201);",
+                            "});",
+                            "",
+                            "const json = pm.response.json();",
+                            "if (json && json.chat && json.chat.id) {",
+                            "    pm.collectionVariables.set(\"chat_id\", json.chat.id);",
+                            "}",
+                            ""
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Send Message",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"message\": \"Write a Python function that reverses a string.\"\n}"
+                },
+                "url": {
+                    "raw": "{{base_url}}/chat/{{chat_id}}",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "chat",
+                        "{{chat_id}}"
+                    ]
+                }
+            },
+            "event": [
+                {
+                    "listen": "prerequest",
+                    "script": {
+                        "exec": [
+                            "if (!pm.collectionVariables.get(\"chat_id\")) {",
+                            "    throw new Error(\"chat_id collection variable missing. Run 'Create Chat' first.\");",
+                            "}"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ]
+        }
+    ]
+}
